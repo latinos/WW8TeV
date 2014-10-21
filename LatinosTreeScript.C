@@ -20,7 +20,8 @@ Double_t DYMVACut_0j[numberDYMVACuts] = {-0.9, -0.86, -0.6, 0.88, 1000};
 Double_t DYMVACut_1j[numberDYMVACuts] = {-0.9, -0.86, -0.6, 0.84, 1000};
 
 Bool_t runAtOviedo = false;
-Bool_t runAtIfca   = !runAtOviedo;
+Bool_t runAtIfca   = false;
+Bool_t runEOS      = false;
 
 
 //gROOT->LoadMacro("../utils/TResultsTable.C+");
@@ -28,15 +29,17 @@ Bool_t runAtIfca   = !runAtOviedo;
 //------------------------------------------------------------------------------
 // LatinosTreeScript
 //------------------------------------------------------------------------------
-void LatinosTreeScript(Float_t luminosity,
+void LatinosTreeScript(TString rootPath,
+		       Float_t luminosity,
 		       Int_t   jetChannel,
 		       TString flavorChannel,
 		       TString theSample,
+		       TString systematic,
 		       Bool_t  verbose)
 {
   TH1::SetDefaultSumw2();
 
-  TString path = Form("rootfiles/%djet/%s/", jetChannel, flavorChannel.Data());
+  TString path = Form("rootfiles/%djet/%s/%s/", jetChannel, systematic.Data(), flavorChannel.Data());
 
   gSystem->mkdir(path, kTRUE);
 
@@ -184,17 +187,18 @@ void LatinosTreeScript(Float_t luminosity,
 
   if (runAtOviedo) filesPath = " /hadoop/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/";
   if (runAtIfca)   filesPath = "/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/Systematics2013_nominals_fromMaiko/"; 
-    //"/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/MoriondeffW/MC_TightTight_DABCABC/";
+  if (runEOS)      filesPath = "root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/cmshww/amassiro/RunI/trees/tree_skim_wwmin_09Jan2014/";
+
+  if (rootPath != "") filesPath = rootPath;
 
   TChain* tree = new TChain("latino", "latino");
 
   if (theSample == "DataRun2012_Total") {
 
-   
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_TightTight/4L/latino_RunA_892pbinv.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_TightTight/4L/latino_RunB_4404pbinv.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_TightTight/4L/latino_RunC_7032pbinv.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Data_TightTight/4L/latino_RunD_7274pbinv.root");
+    tree->Add(filesPath + "/data/" + "latino_RunA_892pbinv.root");
+    tree->Add(filesPath + "/data/" + "latino_RunB_4404pbinv.root");
+    tree->Add(filesPath + "/data/" + "latino_RunC_7032pbinv.root");
+    tree->Add(filesPath + "/data/" + "latino_RunD_7274pbinv.root");
   }
 
   else if (theSample == "WJetsFakes_Total_old") {
@@ -202,129 +206,94 @@ void LatinosTreeScript(Float_t luminosity,
 
  }
   else if (theSample == "WJetsFakes_Total") {
-    //tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/Moriond13/latino_LooseLoose_19.5fb.root");
-    /*
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunA_892pbinv_LooseLoose.root");
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunB_4404pbinv_LooseLoose.root");
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunC_7032pbinv_LooseLoose.root");
-    tree->Add(filesPath + "/Data_LooseLoose_fakeW/4L/latino_RunD_7274pbinv_LooseLoose.root");
-    */
-  
-
-    // Using latest jetEt thresholds. 
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_RunA_892pbinv_LooseLoose.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_RunB_4404pbinv_LooseLoose.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_RunC_7032pbinv_LooseLoose.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_RunD_7274pbinv_LooseLoose.root");
-
-
-    /* tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_085_WgammaToLNuG.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_082_WGstarToElNuMad.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_083_WGstarToMuNuMad.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/WJet_LooseLoose/latino_084_WGstarToTauNuMad.root");*/
-
+      
+    tree->Add(filesPath + "/wjets/" + "latino_RunA_892pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/wjets/" + "latino_RunB_4404pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/wjets/" + "latino_RunC_7032pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/wjets/" + "latino_RunD_7274pbinv_LooseLoose.root");
 
   }
   else if (theSample == "ggWWto2L") {
-    tree->Add(filesPath + "latino_001_GluGluToWWTo4L.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_001_GluGluToWWTo4L.root");
   }
   else if (theSample == "WWTo2L2Nu") {
-    tree->Add(filesPath + "latino_000_WWJets2LMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_000_WWJets2LMad.root");
   }
   else if (theSample == "WWTo2L2Nu_pow") {
-    tree->Add(filesPath + "latino_006_WWJets2LPowheg.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_006_WWJets2LPowheg.root");
   }
   else if (theSample == "WWTo2L2Nu_nonSkim_pow") {
     tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/DiferentialXSection/NoSkim_puW_effW_triggW/latino006.root");
-    
   }
- else if (theSample == "WWTo2L2Nu_mcnlo") {
-   tree->Add(filesPath + "latino_002_WWto2L2NuMCatNLO.root");
+  else if (theSample == "WWTo2L2Nu_mcnlo") {
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_002_WWto2L2NuMCatNLO.root");
   }
-
- else if (theSample == "WWTo2L2Nu_mcnlo_nnll") {
-   tree->Add("/gpfs/csic_projects/cms/calderon/WWGEN/nnllResummation/latino002_nll_ewk.root");
- }
- else if (theSample == "WWTo2L2Nu_pow_nnll") {
-   tree->Add("/gpfs/csic_projects/cms/calderon/WWGEN/nnllResummation/latino006_nll_ewk.root");
- }
- else if (theSample == "WWTo2L2Nu_mad_nnll") {
-   tree->Add("/gpfs/csic_projects/cms/calderon/WWGEN/nnllResummation/latino000_nll_ewk.root");
- }
-
- else if (theSample == "WZ") {
-    tree->Add(filesPath + "latino_074_WZJetsMad.root");
-    tree->Add(filesPath + "latino_078_WZTo2L2QMad.root");
+  else if (theSample == "WWTo2L2Nu_mcnlo_nnll") {
+    tree->Add("/gpfs/csic_projects/cms/calderon/WWGEN/nnllResummation/latino002_nll_ewk.root");
+  }
+  else if (theSample == "WWTo2L2Nu_pow_nnll") {
+    tree->Add("/gpfs/csic_projects/cms/calderon/WWGEN/nnllResummation/latino006_nll_ewk.root");
+  }
+  else if (theSample == "WWTo2L2Nu_mad_nnll") {
+    tree->Add("/gpfs/csic_projects/cms/calderon/WWGEN/nnllResummation/latino000_nll_ewk.root");
+  } else if (theSample == "WZ") {
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_074_WZJetsMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_078_WZTo2L2QMad.root");
   }
   else if (theSample == "ZZ") {
-    tree->Add(filesPath + "latino_075_ZZJetsMad.root");
-    tree->Add(filesPath + "latino_079_ZZTo2L2QMad.root"); 
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_075_ZZJetsMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_079_ZZTo2L2QMad.root"); 
   }
   else if (theSample == "TTbar") {
-    tree->Add(filesPath + "latino_019_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_019_TTTo2L2Nu2B.root");
   }
   else if (theSample == "TW") {
-    tree->Add(filesPath + "latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_012_TbartWFullDR.root");
   }
   else if (theSample == "Top") {
-    tree->Add(filesPath + "latino_019run_TTTo2L2Nu2B.root");
-    tree->Add(filesPath + "latino_011_TtWFullDR.root");
-    tree->Add(filesPath + "latino_012_TbartWFullDR.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_019run_TTTo2L2Nu2B.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_011_TtWFullDR.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_012_TbartWFullDR.root");
   }
   else if (theSample == "DY") {
-    tree->Add(filesPath + "latino_036_DY10toLLMad.root");
-    tree->Add(filesPath + "latino_037_DY50toLLMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_036_DY10toLLMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_037_DY50toLLMad.root");
   }
   else if (theSample == "DYtautau") { // Only for OF channels!!! 
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/MoriondeffW/TauTau/latino_DYtt_19.5fb.root");
-    /*
-    tree->Add(filesPath + "MC_TightTight/2L/latino_113_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_123_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_143_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_153_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_163_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_1730_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_183_DYtt.root");
-    tree->Add(filesPath + "MC_TightTight/2L/latino_1930_DYtt.root");
-    */
-    
+    tree->Add(filesPath + "/templates/" + "latino_DYtt_19.5fb.root"); // CHECK PATH    
   }
   else if (theSample == "Zgamma") { 
-
-    tree->Add(filesPath + "latino_086_ZgammaToLLuG.root");
-
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_086_ZgammaToLLuG.root");
   }
   else if (theSample == "WgammaNoStar") {
-    tree->Add(filesPath + "latino_085_WgammaToLNuG.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_085_WgammaToLNuG.root");
   }
   else if (theSample == "WgammaStar") {
-    tree->Add(filesPath + "latino_082_WGstarToElNuMad.root");
-    tree->Add(filesPath + "latino_083_WGstarToMuNuMad.root");
-    tree->Add(filesPath + "latino_084_WGstarToTauNuMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_082_WGstarToElNuMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_083_WGstarToMuNuMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_084_WGstarToTauNuMad.root");
   }
   else if (theSample == "HWW125") { 
-    tree->Add(filesPath + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
-    //tree->Add(filesPath + "latino_2125_vbfToH125toWWTo2LAndTau2Nu.root");
-    //tree->Add(filesPath + "latino_3125_wzttH125ToWW.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_1125_ggToH125toWWTo2LAndTau2Nu.root");
   }
   else if (theSample =="GamGamWW"){
-    tree->Add(filesPath + "latino_008_GamGamWW.root");    
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_008_GamGamWW.root");    
   }
   else if (theSample == "WJets") {
-    //tree->Add(filesPath + "latino_080_WJetsToLNuMad.root");
-    tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/MC_LooseLoose/4L/latino_080_WJetsToLNuMad.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_080_WJetsToLNuMad.root");
+    //CHECK PATH: tree->Add("/gpfs/csic_projects/tier3data/LatinosSkims/ReducedTrees/R53X_S1_V08_S2_V09_S3_V13/MC_LooseLoose/4L/latino_080_WJetsToLNuMad.root");
   }
   else if (theSample == "VVV") {
-    tree->Add(filesPath + "latino_088_WWGJets.root");
-    tree->Add(filesPath + "latino_089_WZZJets.root");
-    tree->Add(filesPath + "latino_090_ZZZJets.root");
-    tree->Add(filesPath + "latino_091_WWZJets.root");
-    tree->Add(filesPath + "latino_092_WWWJets.root");
-    tree->Add(filesPath + "latino_093_TTWJets.root");
-    tree->Add(filesPath + "latino_094_TTZJets.root");
-    tree->Add(filesPath + "latino_095_TTWWJets.root");
-    tree->Add(filesPath + "latino_096_TTGJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_088_WWGJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_089_WZZJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_090_ZZZJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_091_WWZJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_092_WWWJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_093_TTWJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_094_TTZJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_095_TTWWJets.root");
+    tree->Add(filesPath + "/" + systematic + "/" + "latino_096_TTGJets.root");
   }
   else {
     return;
@@ -796,8 +765,7 @@ void LatinosTreeScript(Float_t luminosity,
 
     */
 
-root 
-        cout << endl;
+    cout << endl;
     cout << " Expected number of RAW events for " << theSample.Data() << endl;
     cout << " ------------------+-----------" << endl;
     cout << " trigger           | " << hWTrigger    ->GetEntries() << endl;
