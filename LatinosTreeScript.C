@@ -39,7 +39,7 @@ void LatinosTreeScript(TString rootPath,
 {
   TH1::SetDefaultSumw2();
 
-  TString path = Form("rootfiles/%djet/%s/%s/", jetChannel, systematic.Data(), flavorChannel.Data());
+  TString path = Form("rootfiles/%s/%djet/%s/", systematic.Data(), jetChannel, flavorChannel.Data());
 
   gSystem->mkdir(path, kTRUE);
 
@@ -211,6 +211,11 @@ void LatinosTreeScript(TString rootPath,
     tree->Add(filesPath + "/wjets/" + "latino_RunB_4404pbinv_LooseLoose.root");
     tree->Add(filesPath + "/wjets/" + "latino_RunC_7032pbinv_LooseLoose.root");
     tree->Add(filesPath + "/wjets/" + "latino_RunD_7274pbinv_LooseLoose.root");
+    tree->Add(filesPath + "/wjets/" + "latino_082_WGstarToElNuMad.root");
+    tree->Add(filesPath + "/wjets/" + "latino_083_WGstarToMuNuMad.root");
+    tree->Add(filesPath + "/wjets/" + "latino_084_WGstarToTauNuMad.root");
+    tree->Add(filesPath + "/wjets/" + "latino_085_WgammaToLNuG.root");
+    tree->Add(filesPath + "/wjets/" + "latino_086_ZgammaToLLuG.root");
 
   }
   else if (theSample == "ggWWto2L") {

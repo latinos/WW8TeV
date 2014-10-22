@@ -1,6 +1,6 @@
 if [ $# -lt 1 ]; then
     echo "  "
-    echo "  ./run.sh NJETS"
+    echo "  ./$(basename $0) NJETS"
     echo "  "
     exit -1
 fi
@@ -32,8 +32,8 @@ muonScale_up        \
 CHANNELS="EMu MuE"
 #EE MuE EMu MuMu "
 
-MERGES="DF"
-# DF SF All
+MERGES="OF"
+# OF SF All
 
 
 SAMPLES="          \
@@ -58,6 +58,8 @@ WJets              \
 WJetsFakes_Total   \
 "
 
+SAMPLES="WJetsFakes_Total"
+
 MERGELIST=" \
 $SAMPLES    \
 WW          \
@@ -66,8 +68,6 @@ WW_mc       \
 Wgamma      \
 "
 
-
-#rm -rf rootfiles/${NJETS}jet
 
 # Loop
 
@@ -81,21 +81,21 @@ for SYSTEMATIC in $SYSTEMATICS; do
   
 	done
 
-	OUTPATH=rootfiles/${NJETS}jet/${SYSTEMATIC}/${CHANNEL}
+	OUTPATH=rootfiles/${SYSTEMATIC}/${NJETS}jet/${CHANNEL}
 
         # Merge some MC files
-	hadd ${OUTPATH}/WW.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu.root 
-	hadd ${OUTPATH}/WW_pow.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu_pow.root 
-	hadd ${OUTPATH}/WW_mc.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu_mcnlo.root
-	hadd ${OUTPATH}/Wgamma.root ${OUTPATH}/WgammaNoStar.root ${OUTPATH}/WgammaStar.root ${OUTPATH}/GamGamWW.root 
+	hadd -f ${OUTPATH}/WW.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu.root 
+	hadd -f ${OUTPATH}/WW_pow.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu_pow.root 
+	hadd -f ${OUTPATH}/WW_mc.root     ${OUTPATH}/ggWWto2L.root     ${OUTPATH}/WWTo2L2Nu_mcnlo.root
+	hadd -f ${OUTPATH}/Wgamma.root ${OUTPATH}/WgammaNoStar.root ${OUTPATH}/WgammaStar.root ${OUTPATH}/GamGamWW.root 
 	
     done
 
-    MERGEPATH=rootfiles/${NJETS}jet/${SYSTEMATIC}/
+    MERGEPATH=rootfiles/${SYSTEMATIC}/${NJETS}jet/
     for MERGE in $MERGES; do
 	mkdir ${MERGEPATH}/${MERGE}/
 	MERGESRC=""
-	[ $MERGE == "DF" ] && MERGESRC="EMu MuE"
+	[ $MERGE == "OF" ] && MERGESRC="EMu MuE"
 	[ $MERGE == "SF" ] && MERGESRC="EE MuMu"
 	[ $MERGE == "All" ] && MERGESRC="EMu MuE EE MuMu"
 	for MSAMPLE in $MERGELIST; do
@@ -103,7 +103,7 @@ for SYSTEMATIC in $SYSTEMATICS; do
 	    for SRC in $MERGESRC; do
 		MFILES="$MFILES ${MERGEPATH}${SRC}/${MSAMPLE}.root"
 	    done
-	    hadd ${MERGEPATH}/${MERGE}/${MSAMPLE}.root $MFILES
+	    hadd -f ${MERGEPATH}/${MERGE}/${MSAMPLE}.root $MFILES
 	done
     done
 
